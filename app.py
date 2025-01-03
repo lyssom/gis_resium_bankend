@@ -71,6 +71,14 @@ def serve_tile(z, x, y):
     """服务瓦片数据"""
     return send_from_directory(f'./datas/pm25/{z}/{x}', f"{y}.png")
 
+@app.route('/tiananmen/<int:z>/<int:x>/<int:y>.png')
+def serve_tiananmen_tile(z, x, y):
+    """服务瓦片数据"""
+    # if not os.path.exists(f'./datas/tiananmen/{z}/{x}/{y}.png'):
+    #     return send_from_directory(f'./datas/tiananmen/{16}/{53956}', f"{40703}.png")
+    new_y = 2**z - y - 1
+    return send_from_directory(f'./datas/tiananmen/{z}/{x}', f"{new_y}.png")
+
 
 from tools.test_db import get_data
 

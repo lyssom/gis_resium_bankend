@@ -1,0 +1,10 @@
+[
+    {
+        "data_name": "陆家嘴",
+        "data_url": "http://127.0.0.1:8000/shtower/tileset.json",
+        "lon": 121.49270522864647,
+        "lat": 31.240015289704218,
+        "alt": 500,
+        "id": "4b8acd4bc1634db5bd31d0b197d83cb9"
+    }
+]

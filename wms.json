@@ -1,0 +1,10 @@
+[
+    {
+        "data_name": "天安门",
+        "data_url": "http://localhost:8000/tiananmen/{z}/{x}/{y}.png",
+        "lon": 116.3836,
+        "lat": 39.9055,
+        "alt": 500,
+        "id": "d712f226e2a7419688ef323412cc67f8"
+    }
+]

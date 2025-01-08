@@ -1,0 +1,25 @@
+[
+    {
+        "data_name": "全局地形",
+        "lon": null,
+        "lat": null,
+        "alt": null,
+        "id": "76ec6ac173754b3d99fef1d6ce802d71"
+    },
+    {
+        "data_name": "丰润区高程",
+        "data_url": "http://localhost:8000/tiles",
+        "lon": 118.05,
+        "lat": 39.8,
+        "alt": null,
+        "id": "3d9ca30106c04121b48c060e4021d1dc"
+    },
+    {
+        "data_name": "潮洛窝乡高程",
+        "data_url": "http://localhost:8000/clwxtiles",
+        "lon": 117.73239,
+        "lat": 39.62112,
+        "alt": null,
+        "id": "deb66655d56146c4a991455ae14717bd"
+    }
+]

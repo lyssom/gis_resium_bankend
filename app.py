@@ -11,7 +11,6 @@ CORS(app)  # 允许跨域
 # 瓦片文件夹路径
 TILES_DIR = os.path.abspath("./datas/example/fy_dem/terrain")  # 替换为你的瓦片文件夹路径
 
-CLWXTILES_DIR = os.path.abspath("./datas/clwx/terrain")
 
 @app.route('/')
 def serve_index():
@@ -41,6 +40,26 @@ def get_layer():
     dtile = os.path.join(TILES_DIR)
     return send_from_directory(dtile, "layer.json")
 
+HMTILES_DIR = os.path.abspath("./datas/hm/terrain")
+@app.route('/hmtiles/<int:z>/<int:x>/<int:y>.terrain')
+def get_hm_tile(z, x, y):
+    # 构建瓦片路径
+    tile_path = os.path.join(HMTILES_DIR, str(z), str(x), f"{y}.terrain")
+    if not os.path.exists(tile_path):
+        return jsonify({"error": "Tile not found"}), 404
+    dtile = os.path.join(HMTILES_DIR, str(z), str(x))
+    response = send_from_directory(dtile, f"{y}.terrain")
+    response.headers['Content-Encoding'] = 'gzip'  # 添加 gzip 编码响应头
+    response.headers['Content-Type'] = 'application/octet-stream'
+    return response
+
+# 提供瓦片文件
+@app.route('/hmtiles/layer.json')
+def get_hm_layer():
+    dtile = os.path.join(HMTILES_DIR)
+    return send_from_directory(dtile, "layer.json")
+
+CLWXTILES_DIR = os.path.abspath("./datas/clwx/terrain")
 @app.route('/clwxtiles/<int:z>/<int:x>/<int:y>.terrain')
 def get_clwx_tile(z, x, y):
     # 构建瓦片路径
@@ -295,6 +314,39 @@ def save_image_data():
         json.dump(data, f, ensure_ascii=False, indent=4)
 
     return jsonify({"code": 0, "msg": "Data appended to file"})
+
+@app.route('/ter_analysis/<filename>')
+def get_ter_analysis_img(filename):
+    return send_from_directory('static/ter_analysis', filename)
+
+@app.route('/get_excavate_resource')
+def get_excavate_resource():
+    excavate_datas = []
+    # http://127.0.0.1:8000/get_excavate_resource?lon=118.1&lat=39.9&hight=363
+    
+    params = request.args
+    lon = float(params.get('lon', 0))
+    lat = float(params.get('lat', 0))
+    hight = float(params.get('hight', 0))
+    print(lon)
+    print(lat)
+    print(hight)
+    if os.path.exists('excavate.json'):
+        with open('excavate.json', 'r', encoding='utf-8') as f:
+            excavate_datas = json.load(f)
+
+    print(excavate_datas)
+    for data in excavate_datas:
+        if data.get('start_lat') <= lat and lat <= data.get('end_lat') and data.get('start_lon') <= lon and lon <= data.get('end_lon'):
+            print(data)
+            for res_hight, resource in data.get('depths').items():
+                print(hight)
+                print(res_hight)
+                if hight <= float(res_hight):
+                    print(resource)
+                    return jsonify(resource)
+            return jsonify(resource)
+    return jsonify({"bottom": "bottom_default.jpg", "side": "side_default.jpg"})
 
 
 # 启动服务器

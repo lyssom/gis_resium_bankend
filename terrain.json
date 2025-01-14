@@ -17,9 +17,17 @@
     {
         "data_name": "潮洛窝乡高程",
         "data_url": "http://localhost:8000/clwxtiles",
-        "lon": 117.73239,
-        "lat": 39.62112,
-        "alt": null,
+        "lon": 117.7,
+        "lat": 39.6,
+        "alt": 500,
         "id": "deb66655d56146c4a991455ae14717bd"
+    },
+    {
+        "data_name": "哈密高程",
+        "data_url": "http://localhost:8000/hmtiles",
+        "lon": 92,
+        "lat": 44.2,
+        "alt": null,
+        "id": "eb733836851e45899fcaef3ae1a147b3"
     }
 ]

@@ -113,36 +113,39 @@ def serve_tiananmen_tile(z, x, y):
 
 from tools.test_db import get_data
 
-@app.route('/all/<int:z>/<int:x>/<int:y>.jpg')
-def serve_all_tile(z, x, y):
-    """服务瓦片数据"""
-    print (z, x, y)
-    d = get_data(z, x, y)
-    # print(d)
-    # # return send_from_directory(f'./datas/pm25/{z}/{x}', f"{y}.png")
-    # import sqlite3
+# @app.route('/all/<int:z>/<int:x>/<int:y>.png')
+# def serve_all_tile(z, x, y):
+#     """服务瓦片数据"""
+#     print (z, x, y)
+#     # return send_from_directory(f'./tianditu_tiles/{z}/{x}', f"{y}.png")
+#     return send_from_directory(f'./datas/all/osm_tiles/{z}/{x}', f"{y}.png")
+#     # d = get_data(z, x, y)
+#     # print(d)
+#     # # return send_from_directory(f'./datas/pm25/{z}/{x}', f"{y}.png")
+#     # import sqlite3
 
-    # # 连接SQLite数据库
-    # conn = sqlite3.connect('../datas/-04-02-All.db')
-    # cursor = conn.cursor()
+#     # # 连接SQLite数据库
+#     # conn = sqlite3.connect('../datas/-04-02-All.db')
+#     # cursor = conn.cursor()
 
-    # # 执行查询，获取BLOB数据
-    # # cursor.execute("show databases")
-    # cursor.execute("SELECT DataValue FROM ImgTable LIMIT 1")
-    # # data = cursor.fetchone()[0]  # 获取BLOB数据
+#     # # 执行查询，获取BLOB数据
+    
+#     # # cursor.execute("show databases")
+#     # cursor.execute("SELECT DataValue FROM ImgTable LIMIT 1")
+#     # # data = cursor.fetchone()[0]  # 获取BLOB数据
 
-    # # # 将BLOB数据写入文件
-    # # # with open('output_data.jpg', 'wb') as f:
-    # # #     f.write(data)
+#     # # # 将BLOB数据写入文件
+#     # # # with open('output_data.jpg', 'wb') as f:
+#     # # #     f.write(data)
 
-    # # conn.close()
-    # with open('./output_data.jpg') as d:
-    #     d= d
-    #     print(333)
-    #     print(d)
-    return Response(d, mimetype='image/jpeg')
-    # image_path = './output_data.jpg'
-    # return send_file(image_path, mimetype='image/jpeg')
+#     # # conn.close()
+#     # with open('./output_data.jpg') as d:
+#     #     d= d
+#     #     print(333)
+#     #     print(d)
+#     return Response(d, mimetype='image/jpeg')
+#     # image_path = './output_data.jpg'
+#     # return send_file(image_path, mimetype='image/jpeg')
 
 @app.route('/shtower/tileset.json')
 def get_sht_tileset():
@@ -250,6 +253,8 @@ def get_image_datas():
     terrain_data = []
     tiles_data = []
     wms_data = []
+    photo_data = []
+    czml_data = []
     if os.path.exists('terrain.json'):
         with open('terrain.json', 'r', encoding='utf-8') as f:
             terrain_data = json.load(f)
@@ -259,7 +264,13 @@ def get_image_datas():
     if os.path.exists('wms.json'):
         with open('wms.json', 'r', encoding='utf-8') as f:
             wms_data = json.load(f)
-    return jsonify({"terrain_data": terrain_data, "tiles_data": tiles_data, "wms_data": wms_data})
+    if os.path.exists('photo.json'):
+        with open('photo.json', 'r', encoding='utf-8') as f:
+            photo_data = json.load(f)
+    if os.path.exists('czml.json'):
+        with open('czml.json', 'r', encoding='utf-8') as f:
+            czml_data = json.load(f)
+    return jsonify({"terrain_data": terrain_data, "tiles_data": tiles_data, "wms_data": wms_data, "photo_data": photo_data, "czml_data": czml_data})
 
 
 @app.route('/save_image_data', methods=['POST'])
@@ -286,6 +297,10 @@ def save_image_data():
         file_name = 'wms.json'
     elif data_type == 'tiles':
         file_name = 'tiles.json'  # 修正为赋值
+    elif data_type == 'photo':
+         file_name = 'photo.json'
+    elif data_type == 'czml':
+         file_name = 'czml.json'  # 修正为赋值
     else:
         return jsonify({"code": 0, "msg": "success"})  # 如果数据类型不匹配，则返回成功
 
@@ -318,6 +333,18 @@ def save_image_data():
 @app.route('/ter_analysis/<filename>')
 def get_ter_analysis_img(filename):
     return send_from_directory('static/ter_analysis', filename)
+
+@app.route('/<filename>/<z>/<x>/<y>')
+def get_static_resource(filename, z, x, y):
+    print(111)
+    print(filename, z, x, y)
+    num_y = y.split('.')[0]
+    print(num_y)
+    new_y = 2**int(z) - int(num_y) - 1
+    print(new_y)
+    new_y = str(new_y)+'.png'
+
+    return send_from_directory(f'./static/{filename}/{z}/{x}', f"{new_y}")
 
 @app.route('/get_excavate_resource')
 def get_excavate_resource():

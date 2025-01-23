@@ -1,0 +1,36 @@
+[
+    {
+      "id": "document",
+      "version": "1.0",
+      "clock": {
+        "interval": "2025-01-01T00:00:00Z/2025-01-01T01:00:00Z",
+        "currentTime": "2025-01-01T00:00:00Z",
+        "multiplier": 1
+      },
+      "entities": [
+        {
+          "id": "billboardExample",
+          "name": "Time-based Billboard",
+          "position": {
+            "cartesian": [6371500, 0, 0]
+          },
+          "billboard": {
+            "image": "http://127.0.0.1:8000/ter_analysis/side_default.jpg",
+            "scale": 1.0,
+            "show": true
+          },
+          "availability": "2025-01-01T00:00:00Z/2025-01-01T00:15:00Z",
+          "time": [
+            {
+              "time": "2025-01-01T00:00:00Z",
+              "image": "http://127.0.0.1:8000/ter_analysis/side_default.jpg"
+            },
+            {
+              "time": "2025-01-01T00:15:00Z",
+              "image": "http://127.0.0.1:8000/ter_analysis/bottom_default.jpg"
+            }
+          ]
+        }
+      ]
+    }
+  ]

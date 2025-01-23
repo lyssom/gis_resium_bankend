@@ -1,0 +1,65 @@
+[
+  {
+    "id": "document",
+    "name": "CZML Point",
+    "version": "1.0",
+    "clock": {
+      "interval": "2025-01-01T00:00:00Z/2025-01-01T00:05:00Z",
+      "currentTime": "2025-01-01T00:00:00Z",
+      "multiplier": 60,
+      "range": "LOOP_STOP",
+      "step": "SYSTEM_CLOCK_MULTIPLIER"
+    }
+  },
+  {
+    "id": "point 1",
+    "name": "point 1",
+    "position": {
+      "cartographicDegrees": [-111.0, 40.0, 0]
+    },
+    "billboard": {
+        "image": "http://127.0.0.1:8000/ter_analysis/side_default.jpg",
+        "scale": 1.0,
+        "show": true,
+        "width": 32,
+        "height": 32
+        },
+    "availability": "2025-01-01T00:00:00Z/2025-01-01T00:01:00Z"
+  },
+  {
+    "id": "point 2",
+    "name": "point 2",
+    "position": {
+      "cartographicDegrees": [-111.0, 40.5, 0]
+    },
+    "point": {
+      "color": {
+        "rgba": [0, 255, 0, 255]
+      },
+      "outlineColor": {
+        "rgba": [255, 0, 0, 255]
+      },
+      "outlineWidth": 4,
+      "pixelSize": 20
+    },
+    "availability": "2025-01-01T00:01:00Z/2025-01-01T00:01:30Z"
+  },
+  {
+    "id": "point 3",
+    "name": "point 3",
+    "position": {
+      "cartographicDegrees": [-111.0, 41.0, 0]
+    },
+    "point": {
+      "color": {
+        "rgba": [0, 0, 255, 255]
+      },
+      "outlineColor": {
+        "rgba": [255, 0, 0, 255]
+      },
+      "outlineWidth": 4,
+      "pixelSize": 20
+    },
+    "availability": "2025-01-01T00:01:30Z/2025-01-01T00:02:00Z"
+  }
+]

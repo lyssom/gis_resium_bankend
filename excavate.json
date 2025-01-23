@@ -1,0 +1,13 @@
+[{
+    "name": "excavate1",
+    "id": 1,
+    "start_lat": 30,
+    "start_lon": 110,
+    "end_lat": 50,
+    "end_lon": 120,
+    "depths": {
+        "0": {"side": "file_0.jpg", "bottom": "bottom_default.jpg"},
+        "100": {"side": "file_1.jpg", "bottom": "bottom_default.jpg"},
+        "200": {"side": "file_2.jpg", "bottom": "bottom_default.jpg"}
+    }
+}]

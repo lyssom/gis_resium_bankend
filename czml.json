@@ -1,0 +1,10 @@
+[
+    {
+        "data_name": "c_exp",
+        "data_url": "http://127.0.0.1:8000/ter_analysis/czml.json",
+        "lon": 1,
+        "lat": 1,
+        "alt": 500,
+        "id": "8c400e66332b4992829a4f159a900d90"
+    }
+]

@@ -1,6 +1,6 @@
 [
     {
-        "data_name": "c_exp",
+        "data_name": "czml示例",
         "data_url": "http://127.0.0.1:8000/ter_analysis/czml.json",
         "lon": 1,
         "lat": 1,

@@ -5,8 +5,33 @@ import os
 import json
 import uuid
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 CORS(app)  # 允许跨域
+
+
+# 瓦片文件夹路径
+ALL_TILES_DIR = os.path.abspath("./datas/terrain")  # 替换为你的瓦片文件夹路径
+
+# 提供瓦片文件
+@app.route('/all_tiles/layer.json')
+def get_all_layer():
+    dtile = os.path.join(ALL_TILES_DIR)
+    return send_from_directory(dtile, "layer.json")
+
+@app.route('/all_tiles/<int:z>/<int:x>/<int:y>.terrain')
+def get_all_tile(z, x, y):
+    # 构建瓦片路径
+    tile_path = os.path.join(ALL_TILES_DIR, str(z), str(x), f"{y}.terrain")
+    if not os.path.exists(tile_path):
+        # with open("666.txt", "a") as f:
+        #     print(tile_path, file=f)
+        #     print(tile_path, file=f)
+        return jsonify({"error": "Tile not found"}), 404
+    dtile = os.path.join(ALL_TILES_DIR, str(z), str(x))
+    response = send_from_directory(dtile, f"{y}.terrain")
+    # response.headers['Content-Encoding'] = 'gzip'  # 添加 gzip 编码响应头
+    # response.headers['Content-Type'] = 'application/octet-stream'
+    return response
 
 # 瓦片文件夹路径
 TILES_DIR = os.path.abspath("./datas/example/fy_dem/terrain")  # 替换为你的瓦片文件夹路径
@@ -334,17 +359,10 @@ def save_image_data():
 def get_ter_analysis_img(filename):
     return send_from_directory('static/ter_analysis', filename)
 
-@app.route('/<filename>/<z>/<x>/<y>')
-def get_static_resource(filename, z, x, y):
-    print(111)
-    print(filename, z, x, y)
-    num_y = y.split('.')[0]
-    print(num_y)
-    new_y = 2**int(z) - int(num_y) - 1
-    print(new_y)
-    new_y = str(new_y)+'.png'
-
-    return send_from_directory(f'./static/{filename}/{z}/{x}', f"{new_y}")
+@app.route('/base_map/<int:z>/<int:x>/<int:y>.png')
+def get_base_map(z, x, y):
+    new_y = 2**z - y - 1
+    return send_from_directory(f'./datas/base_map/{z}/{x}', f"{new_y}.png")
 
 @app.route('/get_excavate_resource')
 def get_excavate_resource():

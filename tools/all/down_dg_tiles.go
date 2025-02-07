@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -13,8 +14,10 @@ import (
 )
 
 const (
-	tileURL       = "http://webst01.is.autonavi.com/appmaptile?style=6&x=%d&y=%d&z=%d"
-	outputDir     = "gd_tiles1"
+	// tileURL       = "http://webst01.is.autonavi.com/appmaptile?style=6&x=%d&y=%d&z=%d"
+	// outputDir     = "gd_tiles1"
+	tileURL       = "https://data.mars3d.cn/terrain/%d/%d/%d.terrain"
+	outputDir     = "terrain"
 	maxGoroutines = 5000 // 最大协程数量
 )
 
@@ -27,6 +30,7 @@ var (
 
 // downloadTile 下载瓦片并保存到本地
 func downloadTile(z, x, y int, wg *sync.WaitGroup) {
+	fmt.Println(1111111233)
 	defer wg.Done()
 	sem <- struct{}{} // 获取信号
 	defer func() { <-sem }()
@@ -37,14 +41,15 @@ func downloadTile(z, x, y int, wg *sync.WaitGroup) {
 		elapsed := time.Since(startTime)
 		fmt.Printf("Downloaded %d tiles, elapsed time: %v\n", total, elapsed)
 	}
+	fmt.Println(11111112)
 
 	// 创建目录
 	zoomDir := filepath.Join(outputDir, fmt.Sprintf("%d", z))
 	levelDir := filepath.Join(zoomDir, fmt.Sprintf("%d", x))
-	tileFile := filepath.Join(levelDir, fmt.Sprintf("%d.png", y))
+	tileFile := filepath.Join(levelDir, fmt.Sprintf("%d.terrain", y))
 
 	if _, err := os.Stat(tileFile); err == nil {
-		// fmt.Printf("Tile %d-%d-%d already exists, skipping.\n", z, x, y)
+		fmt.Printf("Tile %d-%d-%d already exists, skipping.\n", z, x, y)
 		return
 	}
 	if err := os.MkdirAll(levelDir, os.ModePerm); err != nil {
@@ -52,7 +57,7 @@ func downloadTile(z, x, y int, wg *sync.WaitGroup) {
 		return
 	}
 
-	url := fmt.Sprintf(tileURL, x, y, z)
+	url := fmt.Sprintf(tileURL, z, x, y)
 
 	// 创建请求
 	req, err := http.NewRequest("GET", url, nil)
@@ -60,6 +65,7 @@ func downloadTile(z, x, y int, wg *sync.WaitGroup) {
 		fmt.Printf("Error creating request for tile %d-%d-%d: %v\n", z, x, y, err)
 		return
 	}
+	fmt.Println(1111111)
 
 	// 设置请求头
 	// for key, value := range headers {
@@ -67,7 +73,7 @@ func downloadTile(z, x, y int, wg *sync.WaitGroup) {
 	// }
 
 	// 发起请求
-	//	fmt.Println(req)
+	fmt.Println(req)
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Printf("Error downloading tile %d-%d-%d: %v\n", z, x, y, err)
@@ -114,6 +120,14 @@ func latLonToTile(lat, lon float64, z int) (int, int) {
 	return xTile, yTile
 }
 
+// 定义结构体
+type TileRange struct {
+	EndX   int `json:"endX"`
+	EndY   int `json:"endY"`
+	StartX int `json:"startX"`
+	StartY int `json:"startY"`
+}
+
 func main() {
 	var wg sync.WaitGroup
 	startTime = time.Now()
@@ -124,27 +138,59 @@ func main() {
 	// minLon := 73.0  // 中国西部的经度
 	// maxLon := 135.0 // 中国东部的经度
 
-	// // 设置要下载的区域
-	// for z := 11; z <= 11; z++ { // Zoom levels
-	// 	minX, minY := latLonToTile(minLat, minLon, z)
-	// 	maxX, maxY := latLonToTile(maxLat, maxLon, z)
+	for z := 6; z <= 6; z++ { // Zoom levels
+		// fmt.Println(111)
+		// // [
+		// // 	{ "endX": 0, "endY": 1, "startX": -1, "startY": 0 },
+		// // 	{ "endX": 1, "endY": 1, "startX": 1, "startY": 0 }
+		// // ]
+		// minX, minY := -1, 0
+		// maxX, maxY := 0, 1
 
-	// 	for x := minX; x <= maxX; x++ {
-	// 		for y := maxY; y <= minY; y++ {
+		data := ` [
+        { "endX": 31, "endY": 65, "startX": -2, "startY": 0 },
+        { "endX": 63, "endY": 65, "startX": 32, "startY": 0 },
+        { "endX": 95, "endY": 65, "startX": 64, "startY": 0 },
+        { "endX": 127, "endY": 65, "startX": 96, "startY": 0 }
+      ]`
+
+		// 解析 JSON
+		var tiles []TileRange
+		err := json.Unmarshal([]byte(data), &tiles)
+		if err != nil {
+			fmt.Println("JSON 解析错误:", err)
+			return
+		}
+
+		// 输出结果
+		for i, tile := range tiles {
+			fmt.Printf("Tile %d: startX=%d, startY=%d, endX=%d, endY=%d\n", i, tile.StartX, tile.StartY, tile.EndX, tile.EndY)
+			for x := tile.StartX; x <= tile.EndX; x++ {
+				fmt.Println(1112)
+				for y := tile.StartY; y <= tile.EndY; y++ {
+					wg.Add(1)
+					go downloadTile(z, x, y, &wg)
+				}
+			}
+		}
+
+		// for x := minX; x <= maxX; x++ {
+		// 	fmt.Println(1112)
+		// 	for y := minY; y <= maxY; y++ {
+		// 		wg.Add(1)
+		// 		go downloadTile(z, x, y, &wg)
+		// 	}
+		// }
+	}
+
+	// for z := 0; z <= 0; z++ {
+	// 	for x := 0; x < (1 << z); x++ {
+	// 		for y := 0; y < (1 << z); y++ {
 	// 			wg.Add(1)
 	// 			go downloadTile(z, x, y, &wg)
 	// 		}
 	// 	}
 	// }
-
-	for z := 13; z <= 13; z++ { // Zoom levels
-		for x := 0; x < (1 << z); x++ { // X coordinates
-			for y := 0; y < (1 << z); y++ { // Y coordinates
-				wg.Add(1)
-				go downloadTile(z, x, y, &wg)
-			}
-		}
-	}
 
 	wg.Wait()
 	fmt.Println("All tiles downloaded successfully.")

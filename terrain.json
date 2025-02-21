@@ -29,5 +29,13 @@
         "lat": 44.2,
         "alt": null,
         "id": "eb733836851e45899fcaef3ae1a147b3"
+    },
+    {
+        "data_name": "鸡冠区高程",
+        "data_url": "http://localhost:8000/jgtiles",
+        "lon": 130.97,
+        "lat": 45.25,
+        "alt": null,
+        "id": "eb733836777733caef3ae1a147b3"
     }
 ]

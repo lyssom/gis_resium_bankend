@@ -84,6 +84,26 @@ def get_hm_layer():
     dtile = os.path.join(HMTILES_DIR)
     return send_from_directory(dtile, "layer.json")
 
+
+JGTILES_DIR = os.path.abspath("./datas/jg")
+@app.route('/jgtiles/<int:z>/<int:x>/<int:y>.terrain')
+def get_jg_tile(z, x, y):
+    # 构建瓦片路径
+    tile_path = os.path.join(JGTILES_DIR, str(z), str(x), f"{y}.terrain")
+    if not os.path.exists(tile_path):
+        return jsonify({"error": "Tile not found"}), 404
+    dtile = os.path.join(JGTILES_DIR, str(z), str(x))
+    response = send_from_directory(dtile, f"{y}.terrain")
+    response.headers['Content-Encoding'] = 'gzip'  # 添加 gzip 编码响应头
+    response.headers['Content-Type'] = 'application/octet-stream'
+    return response
+
+# 提供瓦片文件
+@app.route('/jgtiles/layer.json')
+def get_jg_layer():
+    dtile = os.path.join(JGTILES_DIR)
+    return send_from_directory(dtile, "layer.json")
+
 CLWXTILES_DIR = os.path.abspath("./datas/clwx/terrain")
 @app.route('/clwxtiles/<int:z>/<int:x>/<int:y>.terrain')
 def get_clwx_tile(z, x, y):
@@ -206,6 +226,14 @@ def get_scene_detail():
     print(scene_code_folder)
     with open(scene_code_folder, 'r', encoding='utf-8') as f:
         data['code'] = f.read()
+    return jsonify(data)
+
+@app.route('/get_wind_data')
+def get_wind_data():
+    with open('2024122600.json', 'r') as f:
+        data = json.load(f)
+    
+    
     return jsonify(data)
 
 

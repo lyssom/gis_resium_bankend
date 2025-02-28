@@ -85,7 +85,7 @@ def get_hm_layer():
     return send_from_directory(dtile, "layer.json")
 
 
-JGTILES_DIR = os.path.abspath("./datas/jg")
+JGTILES_DIR = os.path.abspath("./static/jg")
 @app.route('/jgtiles/<int:z>/<int:x>/<int:y>.terrain')
 def get_jg_tile(z, x, y):
     # 构建瓦片路径
@@ -94,7 +94,8 @@ def get_jg_tile(z, x, y):
         return jsonify({"error": "Tile not found"}), 404
     dtile = os.path.join(JGTILES_DIR, str(z), str(x))
     response = send_from_directory(dtile, f"{y}.terrain")
-    response.headers['Content-Encoding'] = 'gzip'  # 添加 gzip 编码响应头
+    print(111222)
+    # response.headers['Content-Encoding'] = 'gzip'  # 添加 gzip 编码响应头
     response.headers['Content-Type'] = 'application/octet-stream'
     return response
 

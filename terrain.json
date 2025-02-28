@@ -32,10 +32,18 @@
     },
     {
         "data_name": "鸡冠区高程",
-        "data_url": "http://localhost:8000/jgtiles",
+        "data_url": "http://localhost:8000/static/jg",
         "lon": 130.97,
         "lat": 45.25,
         "alt": null,
         "id": "eb733836777733caef3ae1a147b3"
+    },
+    {
+        "data_name": "鸡冠区1",
+        "data_url": "http://localhost:8000/static/flat_jg",
+        "lon": 130.97,
+        "lat": 45.25,
+        "alt": null,
+        "id": "eb71133836777733caef3ae1a147b3"
     }
 ]

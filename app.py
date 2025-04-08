@@ -4,9 +4,71 @@ from flask_cors import CORS
 import os
 import json
 import uuid
+import subprocess
+from datetime import datetime
+import time
+import uuid
+
 
 app = Flask(__name__, static_folder='static')
 CORS(app)  # 允许跨域
+
+
+@app.before_request
+def before_request():
+    print("before_request")
+    if request.endpoint in ['get_lic_info']:
+        return
+    try:
+
+        def get_mac_address():
+            """
+            获取本机物理地址，获取本机mac地址
+            :return:
+            """
+            mac=uuid.UUID(int = uuid.getnode()).hex[-12:].upper()
+            return "-".join([mac[e:e+2] for e in range(0,11,2)])
+
+
+        with open('./lic', 'r+', encoding='utf-8') as f:
+            data = f.read()
+            print(data)
+            
+            command = ['sm4', '-d', data]
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            
+            stdout, stderr = process.communicate()
+            print(stdout)
+            print(stderr)
+            if stderr:
+                return "Authorization required", 200
+
+            json_data = json.loads(stdout.decode('utf-8'))
+
+            start_time = json_data.get('startdate')
+            end_time = json_data.get('enddate')
+            licType = json_data.get('lictype')
+
+            dt_format = "%Y-%m-%d"
+            start_timest = int(datetime.strptime(start_time, dt_format).timestamp())
+            end_timest = int(datetime.strptime(end_time, dt_format).timestamp())
+
+            if licType != "试用":
+                mac = get_mac_address()
+                print(mac)
+                if mac != json_data.get('licmac'):
+                    return "Authorization required", 200
+
+            if start_timest and end_timest:
+                print(start_timest, end_timest)
+                current_time = int(time.time())
+                print(current_time)
+                if current_time < start_timest or current_time > end_timest:
+                    return "Authorization required", 200
+            print(json_data)
+            
+    except Exception as e:
+        return "Authorization required", 200
 
 
 # 瓦片文件夹路径
@@ -40,6 +102,10 @@ TILES_DIR = os.path.abspath("./datas/example/fy_dem/terrain")  # 替换为你的
 @app.route('/')
 def serve_index():
     return render_template('index.html')
+
+@app.route('/lic')
+def lic():
+    return "lic"
 
 
 @app.route('/cesium/<path:filename>')
@@ -327,6 +393,36 @@ def get_image_datas():
     return jsonify({"terrain_data": terrain_data, "tiles_data": tiles_data, "wms_data": wms_data, "photo_data": photo_data, "czml_data": czml_data})
 
 
+
+@app.route('/get_lic_info')
+def get_lic_info():
+    try:
+        with open('./lic', 'r+', encoding='utf-8') as f:
+            data = f.read()
+            print(data)
+            
+            command = ['sm4', '-d', data]
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            
+            stdout, stderr = process.communicate()
+            print(stdout)
+            print(stderr)
+            if stderr:
+                return "Authorization required", 200
+
+            json_data = json.loads(stdout.decode('utf-8'))
+
+            start_time = json_data.get('startdate')
+            end_time = json_data.get('enddate')
+            licType = json_data.get('lictype') 
+            licMac = json_data.get('licmac')
+    except Exception as e:
+        print(e)
+        return jsonify({"licType": "暂无证书", "licStart": "", "licEnd": "", "licMac": ""})
+
+    return jsonify({"licType": licType, "licStart": start_time, "licEnd": end_time, "licMac": licMac})
+
+
 @app.route('/save_image_data', methods=['POST'])
 def save_image_data():
     data = request.get_json()
@@ -421,6 +517,81 @@ def get_excavate_resource():
                     return jsonify(resource)
             return jsonify(resource)
     return jsonify({"bottom": "bottom_default.jpg", "side": "side_default.jpg"})
+
+
+@app.route('/delete_image_data', methods=['POST'])
+def delete_image_data():
+    data = request.get_json()
+
+    # 检查 data 是否为 None
+    if not data:
+        return jsonify({"code": 1, "msg": "No JSON data provided"})
+
+    print(data)
+    print(data.get('data'))
+    
+    # 获取数据细节
+    data_detail = data.get('data', {})
+    data_type = data_detail.pop('data_type', None)
+
+    data_id = data_detail.get('data_id', None)
+
+    # 确定文件名
+    if data_type == 'terrain':
+        file_name = 'terrain.json'
+    elif data_type == 'WMS':
+        file_name = 'wms.json'
+    elif data_type == 'tiles':
+        file_name = 'tiles.json'  # 修正为赋值
+    elif data_type == 'photo':
+         file_name = 'photo.json'
+    elif data_type == 'czml':
+         file_name = 'czml.json'  # 修正为赋值
+    else:
+        return jsonify({"code": 0, "msg": "success"})  # 如果数据类型不匹配，则返回成功
+
+    # # 如果文件不存在，创建一个空的文件并写入数据
+    if not os.path.exists(file_name):
+        return jsonify({"code": 0, "msg": "Data appended to file"})
+
+    # # 读取文件数据，如果文件为空则初始化为空列表
+    with open(file_name, 'r+', encoding='utf-8') as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            data = []  # 如果文件格式错误，初始化为空列表
+
+        if len(data) == 0:  # 文件为空，写入第一行数据
+            return jsonify({"code": 0, "msg": "Data appended to file"})
+        
+        for idx, d in enumerate(data):
+            print(d.get('id'))
+            print(data_id)
+            print(d.get('id')== data_id)
+            if d.get('id') == data_id:
+                print(idx)
+                print()
+                del data[idx]
+
+        f.seek(0)  # 将文件指针移回文件开头
+        print(data)
+        f.truncate()
+        json.dump(data, f, ensure_ascii=False, indent=4)
+        
+    #         data.append(data_detail)
+    #         f.seek(0)  # 将文件指针移回文件开头
+    #         json.dump(data, f, ensure_ascii=False, indent=4)
+    #         return jsonify({"code": 0, "msg": "File was empty, first data written"})
+
+    #     # 如果文件不为空，追加数据
+    #     data.append(data_detail)
+    #     f.seek(0)  # 将文件指针移回文件开头
+    #     json.dump(data, f, ensure_ascii=False, indent=4)
+
+    return jsonify({"code": 0, "msg": "Data appended to file"})
+
+
+
 
 
 # 启动服务器

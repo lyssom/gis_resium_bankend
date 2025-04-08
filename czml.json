@@ -1,7 +1,7 @@
 [
     {
         "data_name": "czml示例",
-        "data_url": "http://127.0.0.1:8000/ter_analysis/czml.json",
+        "data_url": "http://127.0.0.1:8000/ter_analysis/air1.czml",
         "lon": 1,
         "lat": 1,
         "alt": 500,
